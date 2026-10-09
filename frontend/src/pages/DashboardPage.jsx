@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Trash2, Plus, Image as ImageIcon, MessageSquare, LayoutDashboard, ExternalLink, Globe, Settings } from 'lucide-react';
-import api from '../api';
+import api, { getImageUrl } from '../api';
 
 export default function DashboardPage() {
   const [projects, setProjects] = useState([]);
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                 {projects.map(project => (
                   <div key={project.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-gray-700 transition-colors group flex flex-col">
                     <div className="h-48 bg-gray-800 overflow-hidden relative">
-                      {project.images.length > 0 && <img src={`http://127.0.0.1:8000${project.images[0].image_path}`} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
+                      {project.images.length > 0 && <img src={getImageUrl(project.images[0].image_path)} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />}
                       <div className="absolute top-4 left-4 bg-black/70 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full border border-gray-700 flex items-center gap-1">
                         <ImageIcon size={12} /> {project.images.length}
                       </div>

@@ -1,7 +1,15 @@
 import axios from 'axios';
 
+export const BACKEND_URL = 'https://portfolio-backend-rust-kappa.vercel.app';
+
+export const getImageUrl = (path) => {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  return `${BACKEND_URL}${path}`;
+};
+
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: `${BACKEND_URL}/api`,
 });
 
 api.interceptors.request.use((config) => {

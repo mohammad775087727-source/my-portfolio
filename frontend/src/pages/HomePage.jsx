@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Linkedin, Instagram, Mail, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
+import api, { getImageUrl } from '../api';
 
 export default function HomePage() {
   const [projects, setProjects] = useState([]);
@@ -35,7 +35,7 @@ export default function HomePage() {
       if (nameSetting) setProfileName(nameSetting.value);
       
       const picSetting = res.data.find(s => s.key === 'profile_picture');
-      if (picSetting) setProfilePictureUrl(`http://127.0.0.1:8000${picSetting.value}`);
+      if (picSetting) setProfilePictureUrl(getImageUrl(picSetting.value));
 
       const waSetting = res.data.find(s => s.key === 'whatsapp_link');
       if (waSetting) setWhatsappLink(waSetting.value);
@@ -116,7 +116,7 @@ export default function HomePage() {
               <div className="h-56 bg-gray-800 overflow-hidden relative">
                 {project.images.length > 0 ? (
                   <>
-                    <img src={`http://127.0.0.1:8000${project.images[0].image_path}`} alt={project.title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
+                    <img src={getImageUrl(project.images[0].image_path)} alt={project.title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-80"></div>
                   </>
                 ) : (
@@ -182,10 +182,10 @@ export default function HomePage() {
                     <div 
                       key={idx} 
                       className="cursor-pointer overflow-hidden rounded-2xl border border-gray-800 bg-gray-950 hover:border-blue-500 transition-all group shadow-lg aspect-video relative flex items-center justify-center"
-                      onClick={() => setFullscreenImage(`http://127.0.0.1:8000${img.image_path}`)}
+                      onClick={() => setFullscreenImage(getImageUrl(img.image_path))}
                     >
                       <img 
-                        src={`http://127.0.0.1:8000${img.image_path}`} 
+                        src={getImageUrl(img.image_path)} 
                         alt={`صورة المشروع ${idx + 1}`} 
                         className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" 
                       />
