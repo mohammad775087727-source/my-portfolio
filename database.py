@@ -9,16 +9,28 @@ import os
 # استخدام رابط قاعدة البيانات من البيئة (Neon) أو الرجوع إلى SQLite محلياً (في مجلد tmp المسموح بالكتابة فيه على Vercel)
 SQLALCHEMY_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:////tmp/portfolio.db")
 
+import ssl
+
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 else:
-    # توافق مع بروتوكول postgresql في SQLAlchemy واستخدام pg8000 لتجنب أخطاء C Extensions في Vercel
-    if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
-        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
-    elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://") and "pg8000" not in SQLALCHEMY_DATABASE_URL:
-        SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
+    connect_args = {}
+    if SQLALCHEMY_DATABASE_URL.startswith("postgres"):
+        if "?" in SQLALCHEMY_DATABASE_URL:
+            SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.split("?")[0]
+            
+        if "pg8000" not in SQLALCHEMY_DATABASE_URL:
+            if SQLALCHEMY_DATABASE_URL.startswith("postgres://"):
+                SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgres://", "postgresql+pg8000://", 1)
+            elif SQLALCHEMY_DATABASE_URL.startswith("postgresql://"):
+                SQLALCHEMY_DATABASE_URL = SQLALCHEMY_DATABASE_URL.replace("postgresql://", "postgresql+pg8000://", 1)
         
-    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+        connect_args = {"ssl_context": ssl_ctx}
+
+    engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
