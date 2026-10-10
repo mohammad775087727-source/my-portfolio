@@ -17,8 +17,13 @@ import schemas
 import database
 import auth
 
-# إنشاء الجداول في قاعدة البيانات عند التشغيل
-models.Base.metadata.create_all(bind=database.engine)
+# محاولة إنشاء الجداول عند التشغيل وحفظ أي خطأ لفحصه
+db_error_message = None
+try:
+    models.Base.metadata.create_all(bind=database.engine)
+except Exception as e:
+    db_error_message = str(e)
+    print("Database Initialization Error:", e)
 
 app = FastAPI(title="Portfolio Backend API")
 
@@ -66,6 +71,15 @@ def upload_image_to_imgbb(image_file):
 # -----------------
 # مسارات المدير (Admin & Auth)
 # -----------------
+
+@app.get("/api/debug")
+def debug_info():
+    import os
+    return {
+        "db_url_set": "DATABASE_URL" in os.environ,
+        "db_error": db_error_message,
+        "env_preview": os.environ.get("DATABASE_URL", "")[:15] + "..." if "DATABASE_URL" in os.environ else "Not Set"
+    }
 
 @app.post("/api/admin/setup", response_model=schemas.Token)
 def setup_admin(admin_data: schemas.AdminLogin, db: Session = Depends(database.get_db)):
