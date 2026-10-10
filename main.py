@@ -37,11 +37,14 @@ app.add_middleware(
 )
 
 # التأكد من وجود مجلد رفع الصور وتجهيزه
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-# خدمة مجلد الصور كملفات ثابتة (Static Files)
-app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+# في بيئة Vercel، يجب استخدام مسار /tmp/ لأنه الوحيد القابل للكتابة
+UPLOAD_DIR = "/tmp/uploads" if "VERCEL" in os.environ or "DATABASE_URL" in os.environ else "uploads"
+try:
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    # خدمة مجلد الصور كملفات ثابتة (Static Files)
+    app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
+except Exception as e:
+    print("Warning: Could not create or mount uploads directory:", e)
 
 # مفتاح API لموقع ImgBB لرفع الصور سحابياً
 IMGBB_API_KEY = "64a040621ff49008a0d22f6a3fbc299e"
